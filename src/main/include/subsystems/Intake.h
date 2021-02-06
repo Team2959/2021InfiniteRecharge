@@ -4,6 +4,7 @@
 #include <ctre/phoenix/motorcontrol/can/WPI_VictorSPX.h>
 #include <utility/StickySwitch.h>
 #include <RobotMap.h>
+#include <frc/DoubleSolenoid.h>
 
 class Intake
 {
@@ -16,6 +17,9 @@ private:
     ctre::phoenix::motorcontrol::can::WPI_VictorSPX m_kicker {kKickerVictorSpxCanId};
     ctre::phoenix::motorcontrol::can::WPI_VictorSPX m_conveyor {kConveyorVictorSpxCanId};
     
+    frc::DoubleSolenoid m_rightFeeder {2,3};
+    frc::DoubleSolenoid m_leftFeeder {4,5};
+
     // Smart Dashboard
     const std::string kIntakeName = "Intake/";
     const std::string kConveyorName = "Conveyor/";
@@ -65,4 +69,7 @@ public:
     bool GetSensor(SensorLocation location);
     bool GetSensorPressed(SensorLocation location);
     bool GetSensorReleased(SensorLocation location);
+
+    void LeftBallFlipper(bool state);
+    void RightBallFlipper(bool state);
 };

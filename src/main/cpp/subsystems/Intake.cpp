@@ -125,3 +125,21 @@ void Intake::SetKickerSpeed(double speed)
 {
     m_kicker.Set(-speed);
 }
+
+void Intake::LeftBallFlipper(bool state)
+{
+    auto newState = state ? frc::DoubleSolenoid::Value::kForward : frc::DoubleSolenoid::Value::kReverse;
+    if (m_leftFeeder.Get() != newState)
+    {
+        m_leftFeeder.Set(newState);
+    }
+}
+
+void Intake::RightBallFlipper(bool state)
+{
+    auto newState = state ? frc::DoubleSolenoid::Value::kForward : frc::DoubleSolenoid::Value::kReverse;
+    if (m_rightFeeder.Get() != newState)
+    {
+        m_rightFeeder.Set(newState);
+    }
+}

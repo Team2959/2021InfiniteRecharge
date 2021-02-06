@@ -191,10 +191,10 @@ void Robot::TeleopPeriodic()
     //     }
     // }
 
-    if (m_coPilot.GetRawButtonPressed(kClimbExtend))
-    {
-        m_stateManager.StartState(States::Climbing);
-    }
+    // if (m_coPilot.GetRawButtonPressed(kClimbExtend))
+    // {
+    //     m_stateManager.StartState(States::Climbing);
+    // }
 
     m_stateManager.OnTeleopPeriodic();
 }
