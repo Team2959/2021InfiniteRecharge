@@ -2,9 +2,9 @@
 
 #include <frc/smartdashboard/SmartDashboard.h>
 
-StateManager::StateManager(Intake& intake, Shooter& shooter, Climb& climb, Vision& vision, Drivetrain& drivetrain, frc::Joystick& coPilotJoystick)
+StateManager::StateManager(Intake& intake, Shooter& shooter, Climb& climb, Vision& vision, Drivetrain& drivetrain, frc::Joystick& coPilotJoystick, Bling& bling)
     : m_intake(intake), m_shooter(shooter), m_climb(climb), m_vision(vision), m_drivetrain(drivetrain), 
-      m_coPilotJoystick(coPilotJoystick)
+      m_coPilotJoystick(coPilotJoystick), m_bling(bling)
 {
 }
 
@@ -98,6 +98,7 @@ void StateManager::FiringPeriodic()
 void StateManager::ClimbingInit() 
 {
     TravelingInit();
+    m_bling.Send("HAZARD");
 
     m_coPilotJoystick.GetRawButtonPressed(kClimbRetract);
     m_coPilotJoystick.GetRawButtonReleased(kClimbRetract);
@@ -143,6 +144,7 @@ void StateManager::ColorWheelPeriodic()
 
 void StateManager::LoadingInit()
 {
+    m_bling.Send("HAZARD");
     m_intake.ProcessStickySwitches();
     m_intake.GetSensorPressed(Intake::SensorLocation::NewPowercell);
     m_intake.GetSensorPressed(Intake::SensorLocation::SecuredPowercell);

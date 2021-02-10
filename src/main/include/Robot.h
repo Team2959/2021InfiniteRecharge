@@ -52,7 +52,8 @@ private:
   // ColorWheel m_colorWheel {};
   Climb m_climb {};
   Vision m_vision {};
-  StateManager m_stateManager {m_intake, m_shooter, m_climb, m_vision, m_drivetrain, m_coPilot};
+  Bling m_bling {};
+  StateManager m_stateManager {m_intake, m_shooter, m_climb, m_vision, m_drivetrain, m_coPilot, m_bling};
   Autonomous m_autonomous {m_stateManager, m_shooter, m_drivetrain};
 
   const std::string kCameraAngle = "Vision/Camera Angle";
