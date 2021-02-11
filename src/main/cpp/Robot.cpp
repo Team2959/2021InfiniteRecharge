@@ -152,10 +152,12 @@ void Robot::TeleopPeriodic()
     }
     else
     {
-    m_drivetrain.CurvatureDrive(
-        m_driverSpeedConditioning.Condition(-m_driverJoystick.GetY()),
-        m_driverRotationConditioning.Condition(m_driverJoystick.GetTwist()),
-        m_quickTurn.Get());
+        double y = -m_driverJoystick.GetY();
+        double x = m_driverJoystick.GetX();
+        m_drivetrain.CurvatureDrive(
+            m_driverSpeedConditioning.Condition(-m_driverJoystick.GetY()),
+            m_driverRotationConditioning.Condition(m_driverJoystick.GetTwist()),
+            m_quickTurn.Get());
     }
     
     m_shooter.SetSpeedFromThrottle(m_coPilot.GetThrottle());
