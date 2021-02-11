@@ -2,8 +2,8 @@
 
 #include <frc/smartdashboard/SmartDashboard.h>
 
-StateManager::StateManager(Intake& intake, Shooter& shooter, Climb& climb, Vision& vision, Drivetrain& drivetrain, frc::Joystick& coPilotJoystick)
-    : m_intake(intake), m_shooter(shooter), m_climb(climb), m_vision(vision), m_drivetrain(drivetrain), 
+StateManager::StateManager(Intake& intake, Shooter& shooter, Climb& climb, Vision& vision, Drivetrain& drivetrain, Bling& bling, frc::Joystick& coPilotJoystick)
+    : m_intake(intake), m_shooter(shooter), m_climb(climb), m_vision(vision), m_drivetrain(drivetrain), m_bling(bling),
       m_coPilotJoystick(coPilotJoystick)
 {
 }
@@ -58,6 +58,8 @@ void StateManager::TravelingInit()
     m_intake.SetIntakeSpeed(0);
     m_intake.SetKickerSpeed(0);
     m_intake.SetConveyorSpeed(0);
+    
+    m_bling.SendMessage(Bling::BlingMessage::red);
     // m_colorWheel.EngageColorWheel(false);
     if (m_powercellsCounted <= 1)
     {
@@ -81,6 +83,8 @@ void StateManager::FiringInit()
     m_intake.SetIntakeSpeed(0);
     m_intake.SetConveyorSpeed(m_intake.GetConveyorFullSpeed());
     m_intake.SetKickerSpeed(m_intake.GetKickerFullSpeed());
+
+    m_bling.SendMessage(Bling::BlingMessage::popo);
 
     frc::SmartDashboard::PutString("Robot State", "Firing");
 }
@@ -150,6 +154,7 @@ void StateManager::LoadingInit()
     m_intake.SetConveyorSpeed(0);
     m_intake.SetKickerSpeed(m_intake.GetKickerFullSpeed());
     m_intake.SetIntakeSpeed(m_intake.GetIntakeFullSpeed());
+    m_bling.SendMessage(Bling::BlingMessage::hazard);
     m_powercellsCounted = 0;
 
     frc::SmartDashboard::PutString("Robot State", "Loading");

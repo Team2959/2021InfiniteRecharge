@@ -95,8 +95,15 @@ void Robot::RobotPeriodic()
     m_skips++;
 }
 
+
+void Robot::DisabledInit() 
+{
+    m_bling.SendMessage(Bling::BlingMessage::on);
+}
+
 void Robot::AutonomousInit()
 {
+    m_bling.SendMessage(Bling::BlingMessage::autonomous);
     m_shooter.SetAutoKp();
     m_stateManager.OnAutoInit();
     m_autonomous.OnAutoInit();
@@ -111,6 +118,7 @@ void Robot::AutonomousPeriodic()
 
 void Robot::TeleopInit()
 {
+    m_bling.SendMessage(Bling::BlingMessage::spin);
     m_stateManager.Reset();
     m_shooter.SetTeleopKp();
     m_vision.SetCameraMode(CameraMode::VisionProcessing);

@@ -6,6 +6,7 @@
 #include <subsystems/Vision.h>
 #include <subsystems/Drivetrain.h>
 #include <subsystems/Climb.h>
+#include <subsystems/Bling.h>
 #include <frc/Joystick.h>
 
 enum States
@@ -28,6 +29,7 @@ private:
     Climb& m_climb;
     Vision& m_vision;
     Drivetrain& m_drivetrain;
+    Bling& m_bling;
     frc::Joystick& m_coPilotJoystick;
 
     void ProcessUnjammingButtonPresses();
@@ -48,7 +50,7 @@ private:
 
 public:
     StateManager(Intake& intake, Shooter& shooter, Climb& climb, Vision& vision,
-        Drivetrain& drivetrain, frc::Joystick& coPilotJoystick);
+        Drivetrain& drivetrain, Bling& bling, frc::Joystick& coPilotJoystick);
 
     void OnRobotInit();
     void OnAutoInit();
