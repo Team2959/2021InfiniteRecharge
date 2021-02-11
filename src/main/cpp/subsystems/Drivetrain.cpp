@@ -89,7 +89,7 @@ void Drivetrain::UpdateFromSmartDashboard()
 
     auto myP = frc::SmartDashboard::GetNumber(kPGain, currentP);
     auto myI = frc::SmartDashboard::GetNumber(kIGain, currentI);
-    auto myFF = frc::SmartDashboard::GetNumber(kFF, currentFF);
+    auto myFF = frc::SmartDashboard::GetNumber(CkFF, currentFF);
     auto myIZone = frc::SmartDashboard::GetNumber(kIZone, currentIZone);
     if(fabs(myP - currentP) > kCloseToSameValue)
     {
