@@ -13,6 +13,9 @@ private:
     cwtech::StickySwitch m_securedPowercellSensor {kSecuredPowercellSensor};
     cwtech::StickySwitch m_kickerSensor {kKickerSensor};
 
+    cwtech::StickySwitch m_leftFeederSensor{kIntakeLeftFeederSensor};
+    cwtech::StickySwitch m_rightFeederSensor{kIntakeRightFeederSensor};
+
     ctre::phoenix::motorcontrol::can::WPI_VictorSPX m_intake {kIntakeVictorSpxCanId};
     ctre::phoenix::motorcontrol::can::WPI_VictorSPX m_kicker {kKickerVictorSpxCanId};
     ctre::phoenix::motorcontrol::can::WPI_VictorSPX m_conveyor {kConveyorVictorSpxCanId};
@@ -66,10 +69,24 @@ public:
     void SetConveyorSpeed(double speed);
     void SetKickerSpeed(double speed);
 
+    enum FeedingState
+    {
+        Neither,
+        Left,
+        Right,
+    };
+    FeedingState m_feedingState = FeedingState::Neither;
+    int m_feedingSteps = 0;
+    void Feed();
+
     bool GetSensor(SensorLocation location);
     bool GetSensorPressed(SensorLocation location);
     bool GetSensorReleased(SensorLocation location);
 
     void LeftBallFlipper(bool state);
     void RightBallFlipper(bool state);
+    bool GetLeftBallFlipper();
+    bool GetRightBallFlipper();
+    bool GetLeftBallFlipperSensor();
+    bool GetRightBallFlipperSensor();
 };

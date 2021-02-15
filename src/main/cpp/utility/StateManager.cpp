@@ -196,6 +196,28 @@ void StateManager::LoadingPeriodic()
             StartState(States::Traveling);
         }
     }
+    /*// If left has ball trigger that side
+    if(m_intake.GetLeftBallFlipperSensor())
+    {
+        // invert whatever state it is in
+        m_intake.LeftBallFlipper(!m_intake.GetLeftBallFlipper());
+    }
+    else if(m_intake.GetRightBallFlipperSensor())
+    {
+        // invert whatever state it is in
+        m_intake.RightBallFlipper(!m_intake.GetRightBallFlipper());
+    }
+
+    if(!m_intake.GetLeftBallFlipperSensor())
+    {
+        m_intake.LeftBallFlipper(true);
+    }
+    if(!m_intake.GetRightBallFlipperSensor())
+    {
+        m_intake.RightBallFlipper(true);
+    }*/
+    
+    m_intake.Feed();
 
     m_intake.LeftBallFlipper(m_coPilotJoystick.GetRawButton(kClimbExtend));
     m_intake.RightBallFlipper(m_coPilotJoystick.GetRawButton(kClimbRetract));

@@ -42,6 +42,8 @@ void Intake::ProcessStickySwitches()
     m_kickerSensor.ProcessForPressed();
     m_newPowercellSensor.ProcessForPressed();
     m_securedPowercellSensor.ProcessForPressed();
+    m_leftFeederSensor.ProcessForPressed();
+    m_rightFeederSensor.ProcessForPressed();
 }
 
 bool Intake::GetSensor(Intake::SensorLocation location)
@@ -141,5 +143,68 @@ void Intake::RightBallFlipper(bool state)
     if (m_rightFeeder.Get() != newState)
     {
         m_rightFeeder.Set(newState);
+    }
+}
+
+bool Intake::GetLeftBallFlipper()
+{
+    return m_leftFeeder.Get() == frc::DoubleSolenoid::Value::kForward;
+}
+
+bool Intake::GetRightBallFlipper()
+{
+    return m_rightFeeder.Get() == frc::DoubleSolenoid::Value::kForward;
+}
+
+bool Intake::GetLeftBallFlipperSensor()
+{
+    return m_leftFeederSensor.Get();
+}
+
+bool Intake::GetRightBallFlipperSensor()
+{
+    return m_rightFeederSensor.Get();
+}
+
+void Intake::Feed()
+{
+    if(GetLeftBallFlipperSensor() && m_feedingState != FeedingState::Right)
+    {
+        m_feedingState = FeedingState::Left;
+        m_feedingSteps = 0;
+        LeftBallFlipper(false);
+    }
+    else if(GetRightBallFlipperSensor() && m_feedingState != FeedingState::Left)
+    {
+        m_feedingState = FeedingState::Right;
+        m_feedingSteps = 0;
+        RightBallFlipper(false);
+    }
+    /*if(!GetLeftBallFlipperSensor())
+    {
+        m_feedingState = FeedingState::Neither;
+        LeftBallFlipper(true);
+    }
+    if(!GetRightBallFlipperSensor())
+    {
+        m_feedingState = FeedingState::Neither;
+        RightBallFlipper(true);
+    }*/
+    if(m_feedingState != FeedingState::Neither)
+    {
+        m_feedingSteps++;
+    }
+    if(m_feedingSteps == 50)
+    {
+        m_feedingSteps = 0;
+        if(m_feedingState == FeedingState::Left)
+        {
+            LeftBallFlipper(true);
+        }
+        else if(m_feedingState == FeedingState::Right)
+        {
+            RightBallFlipper(true);
+        }
+        m_feedingState = FeedingState::Neither;
     }
 }

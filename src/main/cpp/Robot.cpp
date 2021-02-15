@@ -182,6 +182,8 @@ void Robot::TeleopPeriodic()
         if (m_intake.IsIntakeRunning())
         {
             m_stateManager.StartState(States::Traveling);
+            m_intake.LeftBallFlipper(false);
+            m_intake.RightBallFlipper(false);
         }
         else
         {

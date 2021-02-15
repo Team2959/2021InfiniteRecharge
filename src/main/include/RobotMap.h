@@ -50,3 +50,5 @@ const int kReverseIntake = 10;
 const int kReverseConveyor = 7;
 const int kReverseKicker = 6;
 const int kTurnToTarget = 4;
+const int kIntakeLeftFeederSensor = 4;
+const int kIntakeRightFeederSensor = 3;
