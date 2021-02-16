@@ -40,10 +40,14 @@ private:
     const double kFullConveyorSpeed = 0.6;
     const double kFullKickerSpeed = 0.3;
     const double kFullConveyorSpeedWhenLoading = 1.0;
+    const int kIntakePushCount = 500;
+    const int kIntakeRetractCount = 500;
     double m_intakeSpeed = kFullIntakeSpeed;
     double m_conveyorSpeed = kFullConveyorSpeed;
     double m_conveyorSpeedWhenLoading = kFullConveyorSpeedWhenLoading;
     double m_kickerSpeed = kFullKickerSpeed;
+    double m_intakePushCount = kIntakePushCount;
+    double m_intakeRetractCount = kIntakeRetractCount;
 
     std::string GetIntakeStateText();
 
@@ -71,13 +75,16 @@ public:
 
     enum FeedingState
     {
-        Neither,
-        Left,
-        Right,
+        Open,
+        PushingLeft,
+        RetractingLeft,
+        PushingRight,
+        RetractingRight
     };
-    FeedingState m_feedingState = FeedingState::Neither;
-    int m_feedingSteps = 0;
+    FeedingState m_feedingState = FeedingState::Open;
+    long unsigned int m_feedingSteps = 0;
     void Feed();
+    void SetFeedingState(FeedingState state);
 
     bool GetSensor(SensorLocation location);
     bool GetSensorPressed(SensorLocation location);

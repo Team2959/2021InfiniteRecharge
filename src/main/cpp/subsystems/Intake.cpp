@@ -5,6 +5,7 @@ void Intake::OnRobotInit()
 {
     // Debug Enable
     frc::SmartDashboard::PutBoolean(kDebug, m_debugEnable);
+    frc::SmartDashboard::PutBoolean("Right Feeder Sensor", false);
     // Intake
     frc::SmartDashboard::PutNumber(kIntakeSpeed, kFullIntakeSpeed);
     // Conveyor
@@ -20,6 +21,7 @@ void Intake::OnRobotPeriodic()
     frc::SmartDashboard::PutBoolean("New Power Cell", GetSensor(Intake::SensorLocation::NewPowercell));
     frc::SmartDashboard::PutBoolean("Secured Power Cell", GetSensor(Intake::SensorLocation::SecuredPowercell));
     frc::SmartDashboard::PutBoolean("Kicker Sensor", GetSensor(Intake::SensorLocation::Kicker));
+    frc::SmartDashboard::PutBoolean("Right Feeder Sensor", GetRightBallFlipperSensor());
     frc::SmartDashboard::PutString(kIntakeState, GetIntakeStateText());
 
     if (m_debugEnable == false) return;
@@ -130,20 +132,21 @@ void Intake::SetKickerSpeed(double speed)
 
 void Intake::LeftBallFlipper(bool state)
 {
+    
     auto newState = state ? frc::DoubleSolenoid::Value::kForward : frc::DoubleSolenoid::Value::kReverse;
-    if (m_leftFeeder.Get() != newState)
-    {
+    //if (m_leftFeeder.Get() != newState)
+    //{
         m_leftFeeder.Set(newState);
-    }
+    //}
 }
 
 void Intake::RightBallFlipper(bool state)
 {
     auto newState = state ? frc::DoubleSolenoid::Value::kForward : frc::DoubleSolenoid::Value::kReverse;
-    if (m_rightFeeder.Get() != newState)
-    {
+    //if (m_rightFeeder.Get() != newState)
+    //{
         m_rightFeeder.Set(newState);
-    }
+    //}
 }
 
 bool Intake::GetLeftBallFlipper()
@@ -158,7 +161,8 @@ bool Intake::GetRightBallFlipper()
 
 bool Intake::GetLeftBallFlipperSensor()
 {
-    return m_leftFeederSensor.Get();
+    //return m_leftFeederSensor.Get();
+    return false;
 }
 
 bool Intake::GetRightBallFlipperSensor()
@@ -166,9 +170,53 @@ bool Intake::GetRightBallFlipperSensor()
     return m_rightFeederSensor.Get();
 }
 
+void Intake::SetFeedingState(Intake::FeedingState state) {
+    m_feedingSteps = 0;
+    m_feedingState = state;
+}
+
 void Intake::Feed()
 {
-    if(GetLeftBallFlipperSensor() && m_feedingState != FeedingState::Right)
+    m_feedingSteps++;
+    
+    switch (m_feedingState) {
+    case FeedingState::Open:
+        LeftBallFlipper(true);
+        RightBallFlipper(true);
+
+        if (GetLeftBallFlipperSensor()) {
+            SetFeedingState(FeedingState::PushingLeft);
+        } else if (GetRightBallFlipperSensor()) {
+            SetFeedingState(FeedingState::PushingRight);
+        }
+        break;
+    case FeedingState::PushingLeft:
+        LeftBallFlipper(false);
+        if (m_feedingSteps > m_intakePushCount) {
+            SetFeedingState(FeedingState::RetractingLeft);
+        }
+        break;
+    case FeedingState::RetractingLeft:
+        LeftBallFlipper(true);
+        if (m_feedingSteps > m_intakeRetractCount) {
+            SetFeedingState(FeedingState::Open);
+        }
+        break;
+    case FeedingState::PushingRight:
+        RightBallFlipper(false);
+        if (m_feedingSteps > m_intakePushCount) {
+            SetFeedingState(FeedingState::RetractingRight);
+        }
+        break;
+    case FeedingState::RetractingRight:
+        RightBallFlipper(true);
+        if (m_feedingSteps > m_intakeRetractCount) {
+            SetFeedingState(FeedingState::Open);
+        }
+        break;
+    }
+
+    /*if(GetLeftBallFlipperSensor() && m_feedingState != FeedingState::Right)
     {
         m_feedingState = FeedingState::Left;
         m_feedingSteps = 0;
@@ -189,7 +237,7 @@ void Intake::Feed()
     {
         m_feedingState = FeedingState::Neither;
         RightBallFlipper(true);
-    }*/
+    }
     if(m_feedingState != FeedingState::Neither)
     {
         m_feedingSteps++;
@@ -206,5 +254,5 @@ void Intake::Feed()
             RightBallFlipper(true);
         }
         m_feedingState = FeedingState::Neither;
-    }
+    }*/
 }
