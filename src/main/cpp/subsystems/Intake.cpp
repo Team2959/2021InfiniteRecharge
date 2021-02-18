@@ -23,12 +23,17 @@ void Intake::OnRobotPeriodic()
     frc::SmartDashboard::PutBoolean("Kicker Sensor", GetSensor(Intake::SensorLocation::Kicker));
     frc::SmartDashboard::PutBoolean("Right Feeder Sensor", GetRightBallFlipperSensor());
     frc::SmartDashboard::PutString(kIntakeState, GetIntakeStateText());
+    frc::SmartDashboard::PutNumber("Feeding State", m_feedingState);
+    frc::SmartDashboard::PutNumber("Feeding Extend Time", m_intakePushCount);
+    frc::SmartDashboard::PutNumber("Feeding Retract Time", m_intakeRetractCount);
 
     if (m_debugEnable == false) return;
     m_intakeSpeed = frc::SmartDashboard::GetNumber(kIntakeSpeed, kFullIntakeSpeed);
     m_conveyorSpeed = frc::SmartDashboard::GetNumber(kConveyorSpeed, kFullConveyorSpeed);
     m_conveyorSpeedWhenLoading = frc::SmartDashboard::GetNumber(kConveyorSpeedWhenLoading, kFullConveyorSpeedWhenLoading);
     m_kickerSpeed = frc::SmartDashboard::GetNumber(kKickerSpeed, kFullKickerSpeed);
+    m_intakePushCount = frc::SmartDashboard::GetNumber("Feeding Extend Time", m_intakePushCount);
+    m_intakeRetractCount = frc::SmartDashboard::GetNumber("Feeding Extend Time", m_intakeRetractCount);
 }
 
 std::string Intake::GetIntakeStateText()
@@ -130,19 +135,19 @@ void Intake::SetKickerSpeed(double speed)
     m_kicker.Set(-speed);
 }
 
-void Intake::LeftBallFlipper(bool state)
+void Intake::LeftBallFlipper(FeedingCylinderDirection state)
 {
     
-    auto newState = state ? frc::DoubleSolenoid::Value::kForward : frc::DoubleSolenoid::Value::kReverse;
+    auto newState = state == FeedingCylinderDirection::Closed ? frc::DoubleSolenoid::Value::kForward : frc::DoubleSolenoid::Value::kReverse;
     //if (m_leftFeeder.Get() != newState)
     //{
         m_leftFeeder.Set(newState);
     //}
 }
 
-void Intake::RightBallFlipper(bool state)
+void Intake::RightBallFlipper(FeedingCylinderDirection state)
 {
-    auto newState = state ? frc::DoubleSolenoid::Value::kForward : frc::DoubleSolenoid::Value::kReverse;
+    auto newState = state == FeedingCylinderDirection::Closed ? frc::DoubleSolenoid::Value::kForward : frc::DoubleSolenoid::Value::kReverse;
     //if (m_rightFeeder.Get() != newState)
     //{
         m_rightFeeder.Set(newState);
@@ -162,7 +167,7 @@ bool Intake::GetRightBallFlipper()
 bool Intake::GetLeftBallFlipperSensor()
 {
     //return m_leftFeederSensor.Get();
-    return false;
+    return true;
 }
 
 bool Intake::GetRightBallFlipperSensor()
@@ -181,35 +186,35 @@ void Intake::Feed()
     
     switch (m_feedingState) {
     case FeedingState::Open:
-        LeftBallFlipper(true);
-        RightBallFlipper(true);
+        LeftBallFlipper(FeedingCylinderDirection::Opened);
+        RightBallFlipper(FeedingCylinderDirection::Opened);
 
-        if (GetLeftBallFlipperSensor()) {
+        if (!GetLeftBallFlipperSensor()) {
             SetFeedingState(FeedingState::PushingLeft);
-        } else if (GetRightBallFlipperSensor()) {
+        } else if (!GetRightBallFlipperSensor()) {
             SetFeedingState(FeedingState::PushingRight);
         }
         break;
     case FeedingState::PushingLeft:
-        LeftBallFlipper(false);
+        LeftBallFlipper(FeedingCylinderDirection::Closed);
         if (m_feedingSteps > m_intakePushCount) {
             SetFeedingState(FeedingState::RetractingLeft);
         }
         break;
     case FeedingState::RetractingLeft:
-        LeftBallFlipper(true);
+        LeftBallFlipper(FeedingCylinderDirection::Opened);
         if (m_feedingSteps > m_intakeRetractCount) {
             SetFeedingState(FeedingState::Open);
         }
         break;
     case FeedingState::PushingRight:
-        RightBallFlipper(false);
+        RightBallFlipper(FeedingCylinderDirection::Closed);
         if (m_feedingSteps > m_intakePushCount) {
             SetFeedingState(FeedingState::RetractingRight);
         }
         break;
     case FeedingState::RetractingRight:
-        RightBallFlipper(true);
+        RightBallFlipper(FeedingCylinderDirection::Opened);
         if (m_feedingSteps > m_intakeRetractCount) {
             SetFeedingState(FeedingState::Open);
         }

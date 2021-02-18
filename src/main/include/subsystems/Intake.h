@@ -40,8 +40,8 @@ private:
     const double kFullConveyorSpeed = 0.6;
     const double kFullKickerSpeed = 0.3;
     const double kFullConveyorSpeedWhenLoading = 1.0;
-    const int kIntakePushCount = 500;
-    const int kIntakeRetractCount = 500;
+    const int kIntakePushCount = 10;
+    const int kIntakeRetractCount = 10;
     double m_intakeSpeed = kFullIntakeSpeed;
     double m_conveyorSpeed = kFullConveyorSpeed;
     double m_conveyorSpeedWhenLoading = kFullConveyorSpeedWhenLoading;
@@ -81,6 +81,12 @@ public:
         PushingRight,
         RetractingRight
     };
+
+    enum FeedingCylinderDirection {
+        Opened,
+        Closed
+    };
+
     FeedingState m_feedingState = FeedingState::Open;
     long unsigned int m_feedingSteps = 0;
     void Feed();
@@ -90,8 +96,8 @@ public:
     bool GetSensorPressed(SensorLocation location);
     bool GetSensorReleased(SensorLocation location);
 
-    void LeftBallFlipper(bool state);
-    void RightBallFlipper(bool state);
+    void LeftBallFlipper(FeedingCylinderDirection state);
+    void RightBallFlipper(FeedingCylinderDirection state);
     bool GetLeftBallFlipper();
     bool GetRightBallFlipper();
     bool GetLeftBallFlipperSensor();

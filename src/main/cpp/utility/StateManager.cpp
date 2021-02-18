@@ -219,8 +219,8 @@ void StateManager::LoadingPeriodic()
     
     m_intake.Feed();
 
-    m_intake.LeftBallFlipper(m_coPilotJoystick.GetRawButton(kClimbExtend));
-    m_intake.RightBallFlipper(m_coPilotJoystick.GetRawButton(kClimbRetract));
+    //m_intake.LeftBallFlipper(m_coPilotJoystick.GetRawButton(kClimbExtend));
+    //m_intake.RightBallFlipper(m_coPilotJoystick.GetRawButton(kClimbRetract));
 
     UpdateActivePowerCells();
 }
