@@ -5,9 +5,10 @@ void Intake::OnRobotInit()
 {
     // Debug Enable
     frc::SmartDashboard::PutBoolean(kDebug, m_debugEnable);
-    frc::SmartDashboard::PutBoolean("Right Feeder Sensor", false);
     // Intake
     frc::SmartDashboard::PutNumber(kIntakeSpeed, kFullIntakeSpeed);
+    frc::SmartDashboard::PutBoolean(kIntakeFeederRightSensor, false);
+    frc::SmartDashboard::PutBoolean(kIntakeFeederLeftSensor, false);
     // Conveyor
     frc::SmartDashboard::PutNumber(kConveyorSpeed, kFullConveyorSpeed);
     frc::SmartDashboard::PutNumber(kConveyorSpeedWhenLoading, kFullConveyorSpeedWhenLoading);
@@ -21,9 +22,12 @@ void Intake::OnRobotPeriodic()
     frc::SmartDashboard::PutBoolean("New Power Cell", GetSensor(Intake::SensorLocation::NewPowercell));
     frc::SmartDashboard::PutBoolean("Secured Power Cell", GetSensor(Intake::SensorLocation::SecuredPowercell));
     frc::SmartDashboard::PutBoolean("Kicker Sensor", GetSensor(Intake::SensorLocation::Kicker));
-    frc::SmartDashboard::PutBoolean("Right Feeder Sensor", GetRightBallFlipperSensor());
+
+    frc::SmartDashboard::PutBoolean(kIntakeFeederRightSensor, GetRightBallFlipperSensor());
+    frc::SmartDashboard::PutBoolean(kIntakeFeederLeftSensor, GetLeftBallFlipperSensor());
+    frc::SmartDashboard::PutNumber(kIntakeFeederState, m_feedingState);
+    
     frc::SmartDashboard::PutString(kIntakeState, GetIntakeStateText());
-    frc::SmartDashboard::PutNumber("Feeding State", m_feedingState);
     frc::SmartDashboard::PutNumber("Feeding Extend Time", m_intakePushCount);
     frc::SmartDashboard::PutNumber("Feeding Retract Time", m_intakeRetractCount);
 
@@ -137,21 +141,14 @@ void Intake::SetKickerSpeed(double speed)
 
 void Intake::LeftBallFlipper(FeedingCylinderDirection state)
 {
-    
     auto newState = state == FeedingCylinderDirection::Closed ? frc::DoubleSolenoid::Value::kForward : frc::DoubleSolenoid::Value::kReverse;
-    //if (m_leftFeeder.Get() != newState)
-    //{
-        m_leftFeeder.Set(newState);
-    //}
+    m_leftFeeder.Set(newState);
 }
 
 void Intake::RightBallFlipper(FeedingCylinderDirection state)
 {
     auto newState = state == FeedingCylinderDirection::Closed ? frc::DoubleSolenoid::Value::kForward : frc::DoubleSolenoid::Value::kReverse;
-    //if (m_rightFeeder.Get() != newState)
-    //{
-        m_rightFeeder.Set(newState);
-    //}
+    m_rightFeeder.Set(newState);
 }
 
 bool Intake::GetLeftBallFlipper()
@@ -166,8 +163,7 @@ bool Intake::GetRightBallFlipper()
 
 bool Intake::GetLeftBallFlipperSensor()
 {
-    //return m_leftFeederSensor.Get();
-    return true;
+    return m_leftFeederSensor.Get();
 }
 
 bool Intake::GetRightBallFlipperSensor()

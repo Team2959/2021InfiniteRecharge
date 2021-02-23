@@ -32,6 +32,9 @@ private:
     const std::string kKickerSpeed = kKickerName + "Speed";
     const std::string kIntakeSpeed = kIntakeName + "Speed";
     const std::string kIntakeState = kIntakeName + "State";
+    const std::string kIntakeFeederState = kIntakeName + "Feeder State";
+    const std::string kIntakeFeederRightSensor = kIntakeName + "Right Feeder Sensor";
+    const std::string kIntakeFeederLeftSensor = kIntakeName + "Left Feeder Sensor";
     const std::string kConveyorSpeedWhenLoading = kConveyorName + "Speed When Loading";
 
     bool m_debugEnable = false;

@@ -33,6 +33,8 @@ const int kColorWheelEngagePcmId = 1;
 const int kNewPowercellSensor = 0;
 const int kSecuredPowercellSensor = 1;
 const int kKickerSensor = 2;
+const int kIntakeLeftFeederSensor = 4;
+const int kIntakeRightFeederSensor = 3;
 
 // Joystick Buttons
 // driver
@@ -50,5 +52,4 @@ const int kReverseIntake = 10;
 const int kReverseConveyor = 7;
 const int kReverseKicker = 6;
 const int kTurnToTarget = 4;
-const int kIntakeLeftFeederSensor = 4;
-const int kIntakeRightFeederSensor = 3;
+
