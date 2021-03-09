@@ -37,6 +37,8 @@ void Robot::RobotInit()
     frc::SmartDashboard::PutNumber("Rotation Output Offset", kDefaultOutputOffset);
     frc::SmartDashboard::PutNumber("Rotation Exponent", kDefaultExponent);
 
+    frc::SmartDashboard::PutBoolean("Curvature Drive", true);
+
     frc::SmartDashboard::PutBoolean("Update Conditioning", false);
 
     frc::SmartDashboard::PutBoolean(DriverCameraMode, false);
@@ -126,6 +128,7 @@ void Robot::TeleopInit()
     m_intake.SetIntakeSpeed(0);
     m_intake.SetConveyorSpeed(0);
     m_intake.SetKickerSpeed(0);
+    m_usingCurvatureDrive = frc::SmartDashboard::GetBoolean("Curvature Drive", true);
 }
 
 void Robot::TeleopPeriodic() 
@@ -152,12 +155,23 @@ void Robot::TeleopPeriodic()
     }
     else
     {
-        double y = -m_driverJoystick.GetY();
-        double x = m_driverJoystick.GetX();
-        m_drivetrain.CurvatureDrive(
-            m_driverSpeedConditioning.Condition(-m_driverJoystick.GetY()),
-            m_driverRotationConditioning.Condition(m_driverJoystick.GetTwist()),
-            m_quickTurn.Get());
+        if(m_usingCurvatureDrive)
+        {
+            double y = -m_driverJoystick.GetY();
+            double x = m_driverJoystick.GetX();
+            m_drivetrain.CurvatureDrive(
+                m_driverSpeedConditioning.Condition(-m_driverJoystick.GetY()),
+                m_driverRotationConditioning.Condition(m_driverJoystick.GetTwist()),
+                m_quickTurn.Get());
+        }
+        else
+        {
+            m_drivetrain.TankDrive(
+                -m_driverSpeedConditioning.Condition(m_leftTankDriveJoystick.GetY()),
+                -m_driverSpeedConditioning.Condition(m_driverJoystick.GetY())
+            );
+        }
+        
     }
     
     m_shooter.SetSpeedFromThrottle(m_coPilot.GetThrottle());

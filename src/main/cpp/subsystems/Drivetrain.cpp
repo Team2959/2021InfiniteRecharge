@@ -55,6 +55,11 @@ void Drivetrain::CurvatureDrive(double speed, double rotation, bool quickTurn)
     m_differentialDrive.CurvatureDrive(speed, rotation, quickTurn);
 }
 
+void Drivetrain::TankDrive(double left, double right)
+{
+    m_differentialDrive.TankDrive(left, right);
+}
+
 void Drivetrain::InitalShowToSmartDashboard()
 {
     m_leftPID.SetFF(0.0005);

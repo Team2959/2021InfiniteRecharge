@@ -82,6 +82,8 @@ public:
   // void SetSpeeds(const frc::DifferentialDriveWheelSpeeds& speeds);
   // void SetSpeeds(double left, double right);
   void CurvatureDrive(double speed, double rotation, bool quickTurn);
+  void TankDrive(double left, double right);
+
   // void Drive(units::meter_t meters);
   double GetAngle();
   double GetPostion();

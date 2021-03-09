@@ -31,6 +31,7 @@ private:
   // Joysticks 
   frc::Joystick m_driverJoystick {0};
   frc::Joystick m_coPilot {1};
+  frc::Joystick m_leftTankDriveJoystick {2};
   frc::JoystickButton m_quickTurn {&m_driverJoystick, kQuickTurn};
 
   cwtech::UniformConditioning m_driverSpeedConditioning {};
@@ -58,7 +59,7 @@ private:
   Autonomous m_autonomous {m_stateManager, m_shooter, m_drivetrain};
 
   const std::string kCameraAngle = "Vision/Camera Angle";
-
+  bool m_usingCurvatureDrive = true;
 public:
   void RobotInit() override;
   void RobotPeriodic() override;
