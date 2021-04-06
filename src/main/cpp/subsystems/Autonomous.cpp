@@ -137,7 +137,7 @@ void Autonomous::FireAndForwardPeriodic()
         if (m_cycleDelay++ > 25)
         {
             m_stateManager.StartState(States::Traveling);
-            m_autoDriveDistanceTracker.StartingPosition(m_driveTrain.GetPostion());
+            m_autoDriveDistanceTracker.StartingPosition(m_driveTrain.GetPosition());
             speed = 0.1;
             m_step++;
             m_cycleDelay = 0;
@@ -175,7 +175,7 @@ void Autonomous::FireAndBackwardPeriodic()
         if (m_cycleDelay++ > 25)
         {
             m_stateManager.StartState(States::Traveling);
-            m_autoDriveDistanceTracker.StartingPosition(m_driveTrain.GetPostion());
+            m_autoDriveDistanceTracker.StartingPosition(m_driveTrain.GetPosition());
             speed = -0.15;
             m_step++;
             m_cycleDelay = 0;
@@ -210,13 +210,13 @@ void Autonomous::CenterWithTrenchPeriodic()
         {
             m_stateManager.StartState(States::Traveling);
             m_shooter.SetSpeed(1000);   // idle shooter speed
-            m_autoDriveDistanceTracker.StartingPosition(m_driveTrain.GetPostion());
+            m_autoDriveDistanceTracker.StartingPosition(m_driveTrain.GetPosition());
             m_driveTrain.CurvatureDrive(-0.5, 0, false);
             m_step++;
         }
         break;
     case 2:
-        if (m_autoDriveDistanceTracker.GetDistanceInInches(m_driveTrain.GetPostion()) <= (-5.0 * 12.0))
+        if (m_autoDriveDistanceTracker.GetDistanceInInches(m_driveTrain.GetPosition()) <= (-5.0 * 12.0))
         {
             m_driveTrain.CurvatureDrive(0, 0, false);
             m_autoTurnTargetAngle = m_driveTrain.GetAngle() + 90;
@@ -254,7 +254,7 @@ void Autonomous::WallAndFirePeriodic()
     {
     case 1:
         // drive forward to wall
-        m_autoDriveDistanceTracker.StartingPosition(m_driveTrain.GetPostion());
+        m_autoDriveDistanceTracker.StartingPosition(m_driveTrain.GetPosition());
         speed = 0.1;
         m_step++;
         m_cycleDelay++;

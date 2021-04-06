@@ -7,6 +7,7 @@
 
 #include "Robot.h"
 #include <frc/smartdashboard/SmartDashboard.h>
+#include "utility/Filesystem.h"
 
 const char* DriverCameraMode = "Driver Camera Mode";
 
@@ -31,10 +32,12 @@ void Robot::RobotInit()
 
     frc::SmartDashboard::PutNumber("Speed Deadband", kDefaultDeadband);
     frc::SmartDashboard::PutNumber("Speed Output Offset", kDefaultOutputOffset);
+    frc::SmartDashboard::PutNumber("Speed Output Max", kDefaultOutputMax);
     frc::SmartDashboard::PutNumber("Speed Exponent", kDefaultExponent);
 
     frc::SmartDashboard::PutNumber("Rotation Deadband", kDefaultDeadband);
     frc::SmartDashboard::PutNumber("Rotation Output Offset", kDefaultOutputOffset);
+    frc::SmartDashboard::PutNumber("Rotation Output Max", kDefaultRotationOutputMax);
     frc::SmartDashboard::PutNumber("Rotation Exponent", kDefaultExponent);
 
     frc::SmartDashboard::PutBoolean("Curvature Drive", true);
@@ -46,6 +49,15 @@ void Robot::RobotInit()
     frc::SmartDashboard::PutString("Robot State", "Traveling");
 
     frc::SmartDashboard::PutNumber(kCameraAngle, 23.3);
+
+#define O(n) n, n
+    m_chooser.AddOption(O("Undefined"));
+    m_chooser.AddOption(O("Slalom"));
+    m_chooser.AddOption(O("Light Speed"));
+    m_chooser.AddOption(O("Barrel Run"));
+    m_chooser.AddOption(O("Bounce"));
+#undef O
+    frc::SmartDashboard::PutData(&m_chooser);
 }
 
 void Robot::RobotPeriodic() 
@@ -59,17 +71,19 @@ void Robot::RobotPeriodic()
             double ldb = frc::SmartDashboard::GetNumber("Speed Deadband", kDefaultDeadband);
             double loo = frc::SmartDashboard::GetNumber("Speed Output Offset", kDefaultOutputOffset);
             double lex = frc::SmartDashboard::GetNumber("Speed Exponent", kDefaultExponent);
+            double lom = frc::SmartDashboard::GetNumber("Speed Output Max", kDefaultOutputMax);
 
             double rdb = frc::SmartDashboard::GetNumber("Rotation Deadband", kDefaultDeadband);
             double roo = frc::SmartDashboard::GetNumber("Rotation Output Offset", kDefaultOutputOffset);
             double rex = frc::SmartDashboard::GetNumber("Rotation Exponent", kDefaultExponent);
+            double rom = frc::SmartDashboard::GetNumber("Rotation Output Max", kDefaultRotationOutputMax);
 
             m_driverSpeedConditioning.SetDeadband(ldb);
-            m_driverSpeedConditioning.SetRange(loo, 1.0);
+            m_driverSpeedConditioning.SetRange(loo, lom);
             m_driverSpeedConditioning.SetExponent(lex);
 
             m_driverRotationConditioning.SetDeadband(rdb);
-            m_driverRotationConditioning.SetRange(roo, 1.0);
+            m_driverRotationConditioning.SetRange(roo, rom);
             m_driverRotationConditioning.SetExponent(rex);
         }
     }
@@ -100,7 +114,7 @@ void Robot::RobotPeriodic()
 
 void Robot::DisabledInit() 
 {
-    m_bling.SendMessage(Bling::BlingMessage::on);
+    m_bling.SendMessage(Bling::BlingMessage::red);
 }
 
 void Robot::AutonomousInit()
@@ -157,8 +171,6 @@ void Robot::TeleopPeriodic()
     {
         if(m_usingCurvatureDrive)
         {
-            double y = -m_driverJoystick.GetY();
-            double x = m_driverJoystick.GetX();
             m_drivetrain.CurvatureDrive(
                 m_driverSpeedConditioning.Condition(-m_driverJoystick.GetY()),
                 m_driverRotationConditioning.Condition(m_driverJoystick.GetTwist()),
@@ -223,6 +235,41 @@ void Robot::TeleopPeriodic()
     // }
 
     m_stateManager.OnTeleopPeriodic();
+}
+
+void Robot::StartNewLogFile()
+{
+    if(m_logFile.is_open()) 
+        m_logFile.close();
+    std::string usbDirectory = GetFirstDirectory("/media");
+    std::string filename;
+    if(usbDirectory.length() == 0)
+    {
+        std::string odometryDirectory = "/home/lvuser/odometry";
+        filename = GetFirstModifiedFile(odometryDirectory);
+        filename = odometryDirectory + "/" + filename;
+    }
+    else
+    {
+        usbDirectory = "/media/" + usbDirectory;
+        int i;
+        std::string odometryPrefix = m_chooser.GetSelected();
+        for(i = 0; std::ifstream{usbDirectory + "/" + odometryPrefix + std::to_string(i) + ".csv"}.good(); i++);
+        filename = usbDirectory + "/" + odometryPrefix + std::to_string(i) + ".csv";
+    }
+    std::cout << "Log File:" << filename << std::endl;
+    m_logFile.open(filename);
+    if(!m_logFile.good() || !m_logFile.is_open())
+    {
+        std::cout << "Log File failed to open" << std::endl;
+    }
+    m_logFile << "timestamp,angle,left,right,rotation,positionX,positionY,leftVelocity,rightVelocity,leftSetpoint,rightSetpoint\n" << std::flush;
+}
+
+void Robot::Log()
+{
+    std::string data = m_drivetrain.GetLoggingData();
+    m_logFile << data << std::flush;
 }
 
 void Robot::TestPeriodic() {}

@@ -37,10 +37,16 @@ private:
     const std::string kAppliedOutput = kName + "Applied Output";
     const std::string kMaxThrottleSpeed = kName + "Max Throttle Speed";
     const std::string kMinThrottleSpeed = kName + "Min Throttle Speed";
+    const std::string kRedZoneSpeed = kName + "Red Zone Speed";
+    const std::string kBlueZoneSpeed = kName + "Blue Zone Speed";
+    const std::string kYellowZoneSpeed = kName + "Yellow Zone Speed";
 
     const double kMaxVelocity = 4500;
     const double kMaxThrottleSpeedDefault = 4500;
     const double kMinThrottleSpeedDefault = 1500;
+    const double kRedZoneSpeedDefault = 3000;
+    const double kBlueZoneSpeedDefault = 2750;
+    const double kYellowZoneSpeedDefault = 2000;
     const double kCloseSpeedDefault = 100;
 
     const double kForwardFullSpeed = -1.0;
@@ -51,6 +57,9 @@ private:
     double m_targetSpeed = 0;
     double m_maxThrottleRange = kMaxThrottleSpeedDefault;
     double m_minThrottleRange = kMinThrottleSpeedDefault;
+    double m_redZoneSpeed = kRedZoneSpeedDefault;
+    double m_blueZoneSpeed = kBlueZoneSpeedDefault;
+    double m_yellowZoneSpeed = kYellowZoneSpeedDefault;
     double m_slopeOfThrottleRange = 1;
     double m_offsetOfThrottleRange = 0;
 

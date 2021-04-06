@@ -8,6 +8,7 @@
 #pragma once
 
 #include <string>
+#include <fstream>
 #include <frc/TimedRobot.h>
 #include <frc/Joystick.h>
 #include <frc/buttons/JoystickButton.h>
@@ -40,13 +41,16 @@ private:
   const double kDefaultDeadband = 0.07;
   const double kDefaultOutputOffset = 0.0;
   const double kDefaultExponent = 3.0;
+  const double kDefaultOutputMax = 1.0;
+  const double kDefaultRotationOutputMax = 0.8;
   const double kDefaultAutoTurnMultiplier = 0.05;
   const double kDefaultAutoTurnDegrees = 30.0;
   const double kDefaultAutoTurnOffset = 0.01;
+  const double kDefaultAutoTurnOutputMax = 1.0;
 
   bool m_passed2ndStage = false;
   double m_origTx = 0.0;
-  
+
   // Drivetrain controller
   Drivetrain m_drivetrain {};
   Intake m_intake {};
@@ -60,6 +64,11 @@ private:
 
   const std::string kCameraAngle = "Vision/Camera Angle";
   bool m_usingCurvatureDrive = true;
+
+  std::ofstream m_logFile{};
+  frc::SendableChooser<std::string> m_chooser{};
+  void StartNewLogFile();
+  void Log();
 public:
   void RobotInit() override;
   void RobotPeriodic() override;

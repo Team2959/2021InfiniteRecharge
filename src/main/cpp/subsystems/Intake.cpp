@@ -187,7 +187,8 @@ void Intake::Feed()
 
         if (!GetLeftBallFlipperSensor()) {
             SetFeedingState(FeedingState::PushingLeft);
-        } else if (!GetRightBallFlipperSensor()) {
+        } else
+         if (!GetRightBallFlipperSensor()) {
             SetFeedingState(FeedingState::PushingRight);
         }
         break;

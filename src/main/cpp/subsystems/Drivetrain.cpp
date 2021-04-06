@@ -1,15 +1,16 @@
-/*----------------------------------------------------------------------------*/
-/* Copyright (c) 2018 FIRST. All Rights Reserved.                             */
-/* Open Source Software - may be modified and shared by FRC teams. The code   */
-/* must be accompanied by the FIRST BSD license file in the root directory of */
-/* the project.                                                               */
-/*----------------------------------------------------------------------------*/
+#include "subsystems/Drivetrain.h"
+#include <Robot.h>
 
-#include <subsystems/Drivetrain.h>
+#include "utility/Filesystem.h"
+
+#include <ctime>
+#include <unistd.h>
+#include <hal/cpp/fpga_clock.h>
+
 #include <frc/smartdashboard/SmartDashboard.h>
-#include <AngleConversion.h>
 
-Drivetrain::Drivetrain() 
+
+Drivetrain::Drivetrain()
 {
     m_leftFollower1.Follow(m_leftPrimary);
     m_leftFollower2.Follow(m_leftPrimary);
@@ -20,6 +21,12 @@ Drivetrain::Drivetrain()
     m_rightPrimary.SetInverted(false);
     m_differentialDrive.SetRightSideInverted(true);
 
+    m_leftEncoder.SetPositionConversionFactor(kConversionFactor);
+    m_rightEncoder.SetPositionConversionFactor(kConversionFactor);
+    m_leftEncoder.SetVelocityConversionFactor(kConversionFactor / 60.0);
+    m_rightEncoder.SetVelocityConversionFactor(kConversionFactor / 60.0);
+
+    
     SetupSparkMax(&m_leftPrimary);
     SetupSparkMax(&m_rightPrimary);
     SetupSparkMax(&m_leftFollower1);
@@ -36,19 +43,12 @@ void Drivetrain::SetupSparkMax(rev::CANSparkMax* controller)
     controller->SetOpenLoopRampRate(kOpenLoopRampRate);
 }
 
-// void Drivetrain::SetSpeeds(const frc::DifferentialDriveWheelSpeeds& speeds) 
-// {
-//     // Don't know what to do here
-
-//     // m_leftPID.SetReference(static_cast<double>(speeds.left), rev::ControlType::kVelocity);
-//     // m_rightPID.SetReference(static_cast<double>(speeds.right), rev::ControlType::kVelocity);
-// }
-
-// void Drivetrain::SetSpeeds(double left, double right)
-// {
-//     // m_leftPID.SetReference(left, rev::ControlType::kVelocity);
-//     // m_rightPID.SetReference(right, rev::ControlType::kVelocity);
-// }
+void Drivetrain::SetVolts(units::volt_t left, units::volt_t right)
+{
+    m_leftGroup.SetVoltage(left);
+    m_rightGroup.SetVoltage(-right);
+    m_differentialDrive.Feed();
+}
 
 void Drivetrain::CurvatureDrive(double speed, double rotation, bool quickTurn)
 {
@@ -57,8 +57,87 @@ void Drivetrain::CurvatureDrive(double speed, double rotation, bool quickTurn)
 
 void Drivetrain::TankDrive(double left, double right)
 {
-    m_differentialDrive.TankDrive(left, right);
+    m_differentialDrive.TankDrive(left, right, false);
 }
+
+
+void Drivetrain::OnRobotPeriodic()
+{
+    auto rot = GetRotation();
+    auto left = units::meter_t(m_leftEncoder.GetPosition());
+    auto right = units::meter_t(-m_rightEncoder.GetPosition());
+    m_lastPosition = m_odometry.Update(rot, left, right);
+}
+
+std::string Drivetrain::GetLoggingData()
+{
+    auto rot = GetRotation();
+    auto left = units::meter_t(m_leftEncoder.GetPosition());
+    auto right = units::meter_t(-m_rightEncoder.GetPosition());
+
+    auto pos = m_lastPosition;
+    
+    auto leftV = units::meters_per_second_t(m_leftEncoder.GetVelocity());
+    auto rightV = units::meters_per_second_t(-m_rightEncoder.GetVelocity());
+    
+    std::string data = std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(hal::fpga_clock::now().time_since_epoch()).count()) + ","
+        + std::to_string(m_navX.GetAngle()) + ","
+        + std::to_string(double(left)) + ","
+        + std::to_string(double(right)) + ","
+        + std::to_string(double(rot.Degrees())) + ","
+        + std::to_string(double(pos.X())) + ","
+        + std::to_string(double(pos.Y())) + ","
+        + std::to_string(double(leftV)) + ","
+        + std::to_string(double(rightV)) + ","
+        + std::to_string(m_lastLeftSetpoint.to<double>()) + ","
+        + std::to_string(m_lastRightSetpoint.to<double>()) + ","
+        + "\n";
+    return data;
+}
+
+double Drivetrain::GetAngle() // units::degree_t
+{
+    return m_navX.GetAngle();
+}
+
+frc::Rotation2d Drivetrain::GetRotation()
+{
+    return m_navX.GetRotation2d();
+}
+
+frc::DifferentialDriveWheelSpeeds Drivetrain::GetWheelSpeeds()
+{
+    return{
+        units::meters_per_second_t(m_leftEncoder.GetVelocity()),
+        units::meters_per_second_t(-m_rightEncoder.GetVelocity())
+    };
+}
+
+frc::Pose2d Drivetrain::GetPose()
+{
+    return m_odometry.GetPose();
+}
+
+void Drivetrain::ResetOdometry(frc::Pose2d pose)
+{
+    m_leftEncoder.SetPosition(0);
+    m_rightEncoder.SetPosition(0);
+    m_odometry.ResetPosition(pose, GetRotation());
+}
+
+void Drivetrain::CalculateOutput(units::meters_per_second_t left, units::meters_per_second_t right)
+{
+    m_lastLeftSetpoint = left;
+    m_lastRightSetpoint = right;
+    auto wheelSpeeds = GetWheelSpeeds();
+    auto leftVolts = m_feedForward.Calculate(left);
+    auto rightVolts = m_feedForward.Calculate(right);
+    auto leftPIDMeasurement = m_leftPIDController.Calculate(wheelSpeeds.left.to<double>(), left.to<double>());
+    auto rightPIDMeasurement = m_rightPIDController.Calculate(wheelSpeeds.right.to<double>(), right.to<double>());
+    SetVolts(leftVolts + static_cast<units::volt_t>(leftPIDMeasurement),
+            rightVolts + static_cast<units::volt_t>(rightPIDMeasurement));
+}
+
 
 void Drivetrain::InitalShowToSmartDashboard()
 {
@@ -150,12 +229,7 @@ bool Drivetrain::TryTurnToTargetAngle(double tx)
     return true;
 }
 
-double Drivetrain::GetAngle()
-{
-    return m_navX.GetAngle();
-}
-
-double Drivetrain::GetPostion()
+double Drivetrain::GetPosition()
 {
     return m_rightEncoder.GetPosition();
 }

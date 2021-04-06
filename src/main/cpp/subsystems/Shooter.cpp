@@ -42,6 +42,10 @@ void Shooter::SmartDashboardInit()
     // Min and Max Throttle Speeds
     frc::SmartDashboard::PutNumber(kMaxThrottleSpeed, kMaxThrottleSpeedDefault);
     frc::SmartDashboard::PutNumber(kMinThrottleSpeed, kMinThrottleSpeedDefault);
+    // zone speeds
+    frc::SmartDashboard::PutNumber(kRedZoneSpeed, kRedZoneSpeedDefault);
+    frc::SmartDashboard::PutNumber(kBlueZoneSpeed, kBlueZoneSpeedDefault);
+    frc::SmartDashboard::PutNumber(kYellowZoneSpeed, kYellowZoneSpeedDefault);
 }
 
 void Shooter::OnRobotPeriodic()
@@ -55,6 +59,11 @@ void Shooter::OnRobotPeriodic()
 
     m_maxThrottleRange = frc::SmartDashboard::GetNumber(kMaxThrottleSpeed, kMaxThrottleSpeedDefault);
     m_minThrottleRange = frc::SmartDashboard::GetNumber(kMinThrottleSpeed, kMinThrottleSpeedDefault);
+
+    m_redZoneSpeed = frc::SmartDashboard::GetNumber(kRedZoneSpeed, kRedZoneSpeedDefault);
+    m_blueZoneSpeed = frc::SmartDashboard::GetNumber(kBlueZoneSpeed, kBlueZoneSpeedDefault);
+    m_yellowZoneSpeed = frc::SmartDashboard::GetNumber(kYellowZoneSpeed, kYellowZoneSpeedDefault);
+
     ComputeSlopeAndOffset();
 
     // Close Speed
@@ -129,10 +138,22 @@ void Shooter::SetSpeedFromThrottle(double throttlePosition)
     throttlePosition += 1;  // shift from -1..1 to 0..2 for range
     // 0..0.5, set shooter speed to 0 
     auto targetSpeed = 0.0;
-    if (throttlePosition >= 0.75)
+    // if (throttlePosition >= 0.75)
+    // {
+    //     // do linear interpolation between minimum and maximum throttle speeds
+    //     targetSpeed = (m_slopeOfThrottleRange * throttlePosition) + m_offsetOfThrottleRange; 
+    // }
+    if (throttlePosition >= 1.75)
     {
-        // do linear interpolation between minimum and maximum throttle speeds
-        targetSpeed = (m_slopeOfThrottleRange * throttlePosition) + m_offsetOfThrottleRange; 
+        targetSpeed = m_redZoneSpeed;
+    }
+    else if (throttlePosition >= 1.25)
+    {
+        targetSpeed = m_blueZoneSpeed;
+    }
+    else if (throttlePosition >= 0.75)
+    {
+        targetSpeed = m_yellowZoneSpeed;
     }
     else if (throttlePosition >= 0.25)
     {
